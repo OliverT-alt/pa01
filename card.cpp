@@ -81,103 +81,79 @@ Card BST::getPredecessorNode(const Card& c) const {
 
 
 void playGame(BST& alice, BST& bob) {
-    // 1) Flatten each tree into a sorted vector of Cards
-    vector<Card> aCards, bCards;
-    for (auto it = alice.begin(); it != alice.end(); ++it)
-        aCards.push_back(*it);
-    for (auto it = bob.begin(); it != bob.end(); ++it)
-        bCards.push_back(*it);
-
-    // 2) Game loop: Alice picks smallest-first, then Bob picks largest-first
+    // Alice smallest matching card
     while (true) {
-        // --- Alice’s turn (smallest→largest) ---
-        int ai = 0;
-        while (ai < (int)aCards.size()) {
-            int r = aCards[ai].rank;
-            // find any card in Bob with the same rank
-            auto found = find_if(bCards.begin(), bCards.end(),
-                                 [&](const Card& c){ return c.rank == r; });
-            if (found != bCards.end())
-                break;
-            ++ai;
-        }
-        if (ai >= (int)aCards.size())
-            break;  // no shared rank → end game
+        auto aIt = alice.begin();
+        while (aIt != alice.end() && !bob.contains(aIt->rank))
+            ++aIt;
+        if (aIt == alice.end()) break;
 
-        Card matchA = aCards[ai];
-        // print pick
-        char sc = (matchA.suit==CLUBS?'c'
-                 : matchA.suit==DIAMONDS?'d'
-                 : matchA.suit==HEARTS?'h':'s');
-        string rs = (matchA.rank==14?"a"
-                  : matchA.rank==13?"k"
-                  : matchA.rank==12?"q"
-                  : matchA.rank==11?"j"
+        Card matchA = *aIt;
+        alice.remove(matchA.rank);
+        bob.remove(matchA.rank);
+
+        char sc = (matchA.suit==CLUBS? 'c'
+                 : matchA.suit==DIAMONDS? 'd'
+                 : matchA.suit==HEARTS? 'h'
+                 : 's');
+        string rs = (matchA.rank==14? "a"
+                  : matchA.rank==13? "k"
+                  : matchA.rank==12? "q"
+                  : matchA.rank==11? "j"
                   : to_string(matchA.rank));
         cout << "Alice picked matching card " << sc << " " << rs << "\n";
 
-        // remove from BSTs and vectors
-        alice.remove(matchA.rank);
-        bob.remove(matchA.rank);
-        aCards.erase(aCards.begin() + ai);
-        bCards.erase(found);
+        //Bob picks smallest matching card
+        auto bIt = bob.rbegin();
+        while (bIt != bob.rend() && !alice.contains(bIt->rank))
+            --bIt;
+        if (bIt == bob.rend()) break;
 
-        // --- Bob’s turn (largest→smallest) ---
-        int bj = (int)bCards.size() - 1;
-        while (bj >= 0) {
-            int r = bCards[bj].rank;
-            auto foundA = find_if(aCards.begin(), aCards.end(),
-                                  [&](const Card& c){ return c.rank == r; });
-            if (foundA != aCards.end())
-                break;
-            --bj;
-        }
-        if (bj < 0)
-            break;  // no shared rank → end game
-
-        Card matchB = bCards[bj];
-        sc = (matchB.suit==CLUBS?'c'
-           : matchB.suit==DIAMONDS?'d'
-           : matchB.suit==HEARTS?'h':'s');
-        rs = (matchB.rank==14?"a"
-           : matchB.rank==13?"k"
-           : matchB.rank==12?"q"
-           : matchB.rank==11?"j"
-           : to_string(matchB.rank));
-        cout << "Bob picked matching card " << sc << " " << rs << "\n";
-
+        Card matchB = *bIt;
         alice.remove(matchB.rank);
         bob.remove(matchB.rank);
-        bCards.erase(bCards.begin() + bj);
-        aCards.erase(foundA);
+
+        sc = (matchB.suit==CLUBS? 'c'
+           : matchB.suit==DIAMONDS? 'd'
+           : matchB.suit==HEARTS? 'h'
+           : 's');
+        rs = (matchB.rank==14? "a"
+           : matchB.rank==13? "k"
+           : matchB.rank==12? "q"
+           : matchB.rank==11? "j"
+           : to_string(matchB.rank));
+        cout << "Bob picked matching card " << sc << " " << rs << "\n";
     }
 
-    // 3) Blank line, then final hands
     cout << "\n";
+
+    // final hands
     cout << "Alice's cards:\n";
-    for (auto& c : aCards) {
-        char sc = (c.suit==CLUBS?'c'
-                 : c.suit==DIAMONDS?'d'
-                 : c.suit==HEARTS?'h':'s');
-        string rs = (c.rank==14?"a"
-                  : c.rank==13?"k"
-                  : c.rank==12?"q"
-                  : c.rank==11?"j"
-                  : to_string(c.rank));
+    for (auto it = alice.begin(); it != alice.end(); ++it) {
+        char sc = (it->suit==CLUBS? 'c'
+                 : it->suit==DIAMONDS? 'd'
+                 : it->suit==HEARTS? 'h'
+                 : 's');
+        string rs = (it->rank==14? "a"
+                  : it->rank==13? "k"
+                  : it->rank==12? "q"
+                  : it->rank==11? "j"
+                  : to_string(it->rank));
         cout << sc << " " << rs << "\n";
     }
+
     cout << "Bob's cards:\n";
-    for (auto& c : bCards) {
-        char sc = (c.suit==CLUBS?'c'
-                 : c.suit==DIAMONDS?'d'
-                 : c.suit==HEARTS?'h':'s');
-        string rs = (c.rank==14?"a"
-                  : c.rank==13?"k"
-                  : c.rank==12?"q"
-                  : c.rank==11?"j"
-                  : to_string(c.rank));
+    for (auto it = bob.begin(); it != bob.end(); ++it) {
+        char sc = (it->suit==CLUBS? 'c'
+                 : it->suit==DIAMONDS? 'd'
+                 : it->suit==HEARTS? 'h'
+                 : 's');
+        string rs = (it->rank==14? "a"
+                  : it->rank==13? "k"
+                  : it->rank==12? "q"
+                  : it->rank==11? "j"
+                  : to_string(it->rank));
         cout << sc << " " << rs << "\n";
     }
 }
-
 }
