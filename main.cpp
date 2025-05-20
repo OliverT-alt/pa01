@@ -69,6 +69,9 @@ int main(int argc, char* argv[]) {
         bob.insert(Card(rank, suit));
     }
 
+    cout << "DEBUG Alice has: "; alice.printDeck();
+    cout << "DEBUG Bob   has: "; bob.printDeck();
+
 
     custom_bst::playGame(alice, bob);
     return 0;
