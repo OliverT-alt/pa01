@@ -80,52 +80,60 @@ Card BST::getPredecessorNode(const Card& c) const {
 }
 
 
-// (be sure to have `using namespace std;` near the top)
-
 void playGame(BST& alice, BST& bob) {
-    // 1) Flatten each BST into a sorted vector
+    // 1) Flatten each tree into a sorted vector of Cards
     vector<Card> aCards, bCards;
-    for (auto it = alice.begin(); it != alice.end(); ++it) 
+    for (auto it = alice.begin(); it != alice.end(); ++it)
         aCards.push_back(*it);
-    for (auto it = bob.begin(); it != bob.end(); ++it) 
+    for (auto it = bob.begin(); it != bob.end(); ++it)
         bCards.push_back(*it);
 
-    // 2) Game loop: Alice picks smallest‐first, then Bob largest‐first
+    // 2) Game loop: Alice picks smallest-first, then Bob picks largest-first
     while (true) {
-        // --- Alice’s turn (smallest → largest) ---
+        // --- Alice’s turn (smallest→largest) ---
         int ai = 0;
-        while (ai < (int)aCards.size() && 
-               !binary_search(bCards.begin(), bCards.end(), aCards[ai])) {
+        while (ai < (int)aCards.size()) {
+            int r = aCards[ai].rank;
+            // find any card in Bob with the same rank
+            auto found = find_if(bCards.begin(), bCards.end(),
+                                 [&](const Card& c){ return c.rank == r; });
+            if (found != bCards.end())
+                break;
             ++ai;
         }
-        if (ai >= (int)aCards.size()) break;   // no match → end game
+        if (ai >= (int)aCards.size())
+            break;  // no shared rank → end game
 
         Card matchA = aCards[ai];
-        // Print pick
+        // print pick
         char sc = (matchA.suit==CLUBS?'c'
                  : matchA.suit==DIAMONDS?'d'
                  : matchA.suit==HEARTS?'h':'s');
         string rs = (matchA.rank==14?"a"
-                   : matchA.rank==13?"k"
-                   : matchA.rank==12?"q"
-                   : matchA.rank==11?"j"
-                   : to_string(matchA.rank));
+                  : matchA.rank==13?"k"
+                  : matchA.rank==12?"q"
+                  : matchA.rank==11?"j"
+                  : to_string(matchA.rank));
         cout << "Alice picked matching card " << sc << " " << rs << "\n";
 
-        // Remove from BSTs & vectors
+        // remove from BSTs and vectors
         alice.remove(matchA.rank);
         bob.remove(matchA.rank);
         aCards.erase(aCards.begin() + ai);
-        auto bi = int(lower_bound(bCards.begin(), bCards.end(), matchA) - bCards.begin());
-        bCards.erase(bCards.begin() + bi);
+        bCards.erase(found);
 
-        // --- Bob’s turn (largest → smallest) ---
+        // --- Bob’s turn (largest→smallest) ---
         int bj = (int)bCards.size() - 1;
-        while (bj >= 0 && 
-               !binary_search(aCards.begin(), aCards.end(), bCards[bj])) {
+        while (bj >= 0) {
+            int r = bCards[bj].rank;
+            auto foundA = find_if(aCards.begin(), aCards.end(),
+                                  [&](const Card& c){ return c.rank == r; });
+            if (foundA != aCards.end())
+                break;
             --bj;
         }
-        if (bj < 0) break;  // no match → end game
+        if (bj < 0)
+            break;  // no shared rank → end game
 
         Card matchB = bCards[bj];
         sc = (matchB.suit==CLUBS?'c'
@@ -141,14 +149,13 @@ void playGame(BST& alice, BST& bob) {
         alice.remove(matchB.rank);
         bob.remove(matchB.rank);
         bCards.erase(bCards.begin() + bj);
-        auto aj = int(lower_bound(aCards.begin(), aCards.end(), matchB) - aCards.begin());
-        aCards.erase(aCards.begin() + aj);
+        aCards.erase(foundA);
     }
 
-    // 3) One blank line, then final hands
+    // 3) Blank line, then final hands
     cout << "\n";
     cout << "Alice's cards:\n";
-    for (auto &c : aCards) {
+    for (auto& c : aCards) {
         char sc = (c.suit==CLUBS?'c'
                  : c.suit==DIAMONDS?'d'
                  : c.suit==HEARTS?'h':'s');
@@ -160,7 +167,7 @@ void playGame(BST& alice, BST& bob) {
         cout << sc << " " << rs << "\n";
     }
     cout << "Bob's cards:\n";
-    for (auto &c : bCards) {
+    for (auto& c : bCards) {
         char sc = (c.suit==CLUBS?'c'
                  : c.suit==DIAMONDS?'d'
                  : c.suit==HEARTS?'h':'s');
