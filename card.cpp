@@ -8,6 +8,8 @@
 #include <fstream>
 #include <string>
 
+using namespace std;
+
 Card::Card(int r, Suit s) : rank(r), suit(s) {
     if (r < 2 || r > 14) throw std::invalid_argument("Invalid rank");
 }
@@ -103,7 +105,6 @@ void playGame(BST& alice, BST& bob) {
         cout << "Bob picked matching card " << matchB.toString() << "\n";
     }
 
-    //Blank line before final hands
     cout << "\n";
 
     //Print Alice's remaining cards, one per line
