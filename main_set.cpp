@@ -19,35 +19,54 @@ int main(int argc, char* argv[]) {
     }
 
     set_bst::BST alice, bob;
-    std::string rankStr, suitStr;
+    char suitCh;
+    std::string rankStr;
 
-    // Read Alice
-    while (inA >> rankStr >> suitStr) {
-        int rank = (rankStr=="Jack")  ? 11 :
-                   (rankStr=="Queen") ? 12 :
-                   (rankStr=="King")  ? 13 :
-                   (rankStr=="Ace")   ? 14 :
-                                        std::stoi(rankStr);
-        Suit suit = (suitStr=="Clubs")    ? CLUBS    :
-                    (suitStr=="Diamonds") ? DIAMONDS :
-                    (suitStr=="Hearts")   ? HEARTS   :
-                                            SPADES;
-        alice.insert(Card(rank, suit));
-    }
-    // Read Bob
-    while (inB >> rankStr >> suitStr) {
-        int rank = (rankStr=="Jack")  ? 11 :
-                   (rankStr=="Queen") ? 12 :
-                   (rankStr=="King")  ? 13 :
-                   (rankStr=="Ace")   ? 14 :
-                                        std::stoi(rankStr);
-        Suit suit = (suitStr=="Clubs")    ? CLUBS    :
-                    (suitStr=="Diamonds") ? DIAMONDS :
-                    (suitStr=="Hearts")   ? HEARTS   :
-                                            SPADES;
-        bob.insert(Card(rank, suit));
+    // Read Alice:
+    while (inA >> suitCh >> rankStr) {
+    int rank;
+    
+    if      (rankStr == "a" || rankStr == "A") rank = 14;
+    else if (rankStr == "j" || rankStr == "J") rank = 11;
+    else if (rankStr == "q" || rankStr == "Q") rank = 12;
+    else if (rankStr == "k" || rankStr == "K") rank = 13;
+    else                                       rank = std::stoi(rankStr);
+
+    Suit suit;
+    switch (std::tolower(suitCh)) {
+      case 'c': suit = CLUBS;    break;
+      case 'd': suit = DIAMONDS; break;
+      case 'h': suit = HEARTS;   break;
+      case 's': suit = SPADES;   break;
+      default:
+        std::cerr << "Invalid suit: " << suitCh << "\n";
+        continue;
     }
 
+    alice.insert(Card(rank, suit));
+   }
+    // Read bob:
+    while (inB >> suitCh >> rankStr) {
+    int rank;
+    if      (rankStr == "a" || rankStr == "A") rank = 14;
+    else if (rankStr == "j" || rankStr == "J") rank = 11;
+    else if (rankStr == "q" || rankStr == "Q") rank = 12;
+    else if (rankStr == "k" || rankStr == "K") rank = 13;
+    else                                       rank = std::stoi(rankStr);
+
+    Suit suit;
+    switch (std::tolower(suitCh)) {
+      case 'c': suit = CLUBS;    break;
+      case 'd': suit = DIAMONDS; break;
+      case 'h': suit = HEARTS;   break;
+      case 's': suit = SPADES;   break;
+      default:
+        std::cerr << "Invalid suit: " << suitCh << "\n";
+        continue;
+    }
+
+    bob.insert(Card(rank, suit));
+}
     set_bst::playGame(alice, bob);
     return 0;
 }
