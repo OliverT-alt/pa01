@@ -77,99 +77,44 @@ Card BST::getPredecessorNode(const Card& c) const {
     return *(--it);
 }
 
+
 void playGame(BST& alice, BST& bob) {
-    int maxRounds;
-    std::string aliceFile, bobFile;
-    std::cin >> maxRounds >> aliceFile >> bobFile;
-
-    // read alics cards
-    std::ifstream aliceIn(aliceFile);
-    if (!aliceIn.is_open()) {
-        std::cerr << "Error opening " << aliceFile << std::endl;
-        return;
-    }
-    std::string rankStr, suitStr;
-    while (aliceIn >> rankStr >> suitStr) {
-        int rank =  
-            (rankStr == "Jack")  ? 11 :
-            (rankStr == "Queen") ? 12 :
-            (rankStr == "King")  ? 13 :
-            (rankStr == "Ace")   ? 14 :
-                                  std::stoi(rankStr);
-        Suit suit =
-            (suitStr == "Clubs")    ? CLUBS    :
-            (suitStr == "Diamonds") ? DIAMONDS :
-            (suitStr == "Hearts")   ? HEARTS   :
-                                     SPADES;
-        alice.insert(Card(rank, suit));
-    }
-    aliceIn.close();
-
-    // read bob cards
-    std::ifstream bobIn(bobFile);
-    if (!bobIn.is_open()) {
-        std::cerr << "Error opening " << bobFile << std::endl;
-        return;
-    }
-    while (bobIn >> rankStr >> suitStr) {
-        int rank =  
-            (rankStr == "Jack")  ? 11 :
-            (rankStr == "Queen") ? 12 :
-            (rankStr == "King")  ? 13 :
-            (rankStr == "Ace")   ? 14 :
-                                  std::stoi(rankStr);
-        Suit suit =
-            (suitStr == "Clubs")    ? CLUBS    :
-            (suitStr == "Diamonds") ? DIAMONDS :
-            (suitStr == "Hearts")   ? HEARTS   :
-                                     SPADES;
-        bob.insert(Card(rank, suit));
-    }
-    bobIn.close();
-
-    // play rounds
-    for (int round = 1; round <= maxRounds; ++round) {
-        // Stop if no common cards remain
-        bool aliceHasAny = false, bobHasAny = false;
-        for (int r = 2; r <= 14; ++r) {
-            if (alice.contains(r)) aliceHasAny = true;
-            if (bob.contains(r))   bobHasAny   = true;
-        }
-        if (!aliceHasAny || !bobHasAny) break;
-
-        // Alice's turn smallest to largest
+    //Alice picks her smallest matching card
+    while (true) {
         auto aIt = alice.begin();
-        while (aIt != alice.end() && !bob.contains(aIt->rank)) ++aIt;
-        if (aIt == alice.end()) break;
+        while (aIt != alice.end() && !bob.contains(aIt->rank))
+            ++aIt;
+        if (aIt == alice.end())
+            break;
         Card matchA = *aIt;
         alice.remove(matchA.rank);
         bob.remove(matchA.rank);
-        std::cout << "Alice picked matching card " 
-                  << matchA.toString() << "\n";  
+        cout << "Alice picked matching card " << matchA.toString() << "\n";
 
-        // Bob's turn largest to smallest
-        auto bIt = bob.rbegin();
-        while (bIt != bob.rend() && !alice.contains(bIt->rank)) --bIt;
-        if (bIt == bob.rend()) break;
+        //Bob picks his smallest matching card
+        auto bIt = bob.begin();
+        while (bIt != bob.end() && !alice.contains(bIt->rank))
+            ++bIt;
+        if (bIt == bob.end())
+            break;
         Card matchB = *bIt;
         alice.remove(matchB.rank);
         bob.remove(matchB.rank);
-        std::cout << "Bob picked matching card " 
-                  << matchB.toString() << "\n";
+        cout << "Bob picked matching card " << matchB.toString() << "\n";
     }
 
-    //final hands
-    std::cout << "\n"; 
+    //Blank line before final hands
+    cout << "\n";
 
-    std::cout << "Alice's cards:\n";
-    for (auto it = alice.begin(); it != alice.end(); ++it) {
-        std::cout << it->toString() << "\n";
-    }
+    //Print Alice's remaining cards, one per line
+    cout << "Alice's cards:\n";
+    for (auto it = alice.begin(); it != alice.end(); ++it)
+        cout << it->toString() << "\n";
 
-    std::cout << "Bob's cards:\n";
-    for (auto it = bob.begin(); it != bob.end(); ++it) {
-        std::cout << it->toString() << "\n";
-    }
+    //Print Bob's remaining cards, one per line
+    cout << "Bob's cards:\n";
+    for (auto it = bob.begin(); it != bob.end(); ++it)
+        cout << it->toString() << "\n";
 }
 
 }

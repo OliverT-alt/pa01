@@ -3,6 +3,8 @@
 #include <fstream>
 #include <string>
 
+using namespace std;
+
 namespace custom_bst {
     BST::BST() : root(nullptr) {}
 
@@ -193,92 +195,40 @@ void BST::remove(int rank) {
 
 
 void playGame(BST& alice, BST& bob) {
-    int maxRounds;
-    std::string aliceFile, bobFile;
-    std::cin >> maxRounds >> aliceFile >> bobFile;  
-
-    // Read Alice's cards
-    std::ifstream aliceIn(aliceFile);
-    if (!aliceIn.is_open()) {
-        std::cerr << "Error opening " << aliceFile << std::endl;
-        return;
-    }
-    std::string rankStr, suitStr;
-    while (aliceIn >> rankStr >> suitStr) {
-        int rank = (rankStr == "Jack")  ? 11 :
-                   (rankStr == "Queen") ? 12 :
-                   (rankStr == "King")  ? 13 :
-                   (rankStr == "Ace")   ? 14 :
-                                          std::stoi(rankStr); 
-        Suit suit = (suitStr == "Clubs")    ? CLUBS    :
-                    (suitStr == "Diamonds") ? DIAMONDS :
-                    (suitStr == "Hearts")   ? HEARTS   :
-                                              SPADES;
-        alice.insert(Card(rank, suit));  
-    }
-    aliceIn.close();  
-
-    // Read Bob's cards
-    std::ifstream bobIn(bobFile);
-    if (!bobIn.is_open()) {
-        std::cerr << "Error opening " << bobFile << std::endl;
-        return;
-    }
-    while (bobIn >> rankStr >> suitStr) {
-        int rank = (rankStr == "Jack")  ? 11 :
-                   (rankStr == "Queen") ? 12 :
-                   (rankStr == "King")  ? 13 :
-                   (rankStr == "Ace")   ? 14 :
-                                          std::stoi(rankStr);
-        Suit suit = (suitStr == "Clubs")    ? CLUBS    :
-                    (suitStr == "Diamonds") ? DIAMONDS :
-                    (suitStr == "Hearts")   ? HEARTS   :
-                                              SPADES;
-        bob.insert(Card(rank, suit));
-    }
-    bobIn.close();
-
-    // play up to maxRounds, picking smallest common card each turn
-    for (int round = 1; round <= maxRounds; ++round) {
-        // find Alice's pick: smallest in alice that bob also contains
+    //alice picks her smallest matching card
+    while (true) {
         auto aIt = alice.begin();
-        while (aIt != alice.end() && !bob.contains(aIt->rank)) {
-            ++aIt;  
-        }
-        if (aIt == alice.end()) break;
+        while (aIt != alice.end() && !bob.contains(aIt->rank))
+            ++aIt;
+        if (aIt == alice.end()) 
+            break;
         Card matchA = *aIt;
         alice.remove(matchA.rank);
         bob.remove(matchA.rank);
-        std::cout << "Alice picked matching card " 
-                  << matchA.toString() << "\n";  
+        cout << "Alice picked matching card "
+             << matchA.toString() << "\n";
 
-        // Find Bob's pick: smallest in bob that alice also contains
+        //Bob picks his smallest matching card
         auto bIt = bob.begin();
-        while (bIt != bob.end() && !alice.contains(bIt->rank)) {
+        while (bIt != bob.end() && !alice.contains(bIt->rank))
             ++bIt;
-        }
-        if (bIt == bob.end()) break;
+        if (bIt == bob.end())
+            break;
         Card matchB = *bIt;
         alice.remove(matchB.rank);
         bob.remove(matchB.rank);
-        std::cout << "Bob picked matching card " 
-                  << matchB.toString() << "\n";
+        cout << "Bob picked matching card "
+             << matchB.toString() << "\n";
     }
+    cout << "\n";
+     // print Alice's remaining cards
+    cout << "Alice's cards:\n";
+    for (auto it = alice.begin(); it != alice.end(); ++it)
+        cout << it->toString() << "\n";
 
-   
-    std::cout << "\n"; 
-
-    // Print Alice's remaining cards, one per line
-    std::cout << "Alice's cards:\n";
-    for (auto it = alice.begin(); it != alice.end(); ++it) {
-        std::cout << it->toString() << "\n";
-    }
-
-    // Print Bob's remaining cards, one per line
-    std::cout << "Bob's cards:\n";
-    for (auto it = bob.begin(); it != bob.end(); ++it) {
-        std::cout << it->toString() << "\n";
-    }
+    // print Bob's remaining cards
+    cout << "Bob's cards:\n";
+    for (auto it = bob.begin(); it != bob.end(); ++it)
+        cout << it->toString() << "\n";
 }
-
 }
