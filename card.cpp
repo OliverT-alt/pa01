@@ -23,9 +23,14 @@ std::string Card::toString() const {
 }
 
 bool Card::operator<(const Card& other) const {
-    if (rank != other.rank) return rank < other.rank;
-    return suit < other.suit;
+    if (suit != other.suit)
+        return suit < other.suit;
+
+    auto thisOrder  = (rank == 14 ? 1 : rank);
+    auto otherOrder = (other.rank == 14 ? 1 : other.rank);
+    return thisOrder < otherOrder;
 }
+
 
 bool Card::operator==(const Card& other) const {
     return rank == other.rank && suit == other.suit;

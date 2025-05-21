@@ -8,7 +8,7 @@
 #include <string>
 #include <set>
 
-enum Suit { CLUBS, DIAMONDS, HEARTS, SPADES };
+enum Suit { CLUBS, DIAMONDS, SPADES, HEARTS };
 
 class Card {
 public:
