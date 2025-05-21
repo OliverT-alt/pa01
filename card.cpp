@@ -44,6 +44,13 @@ void BST::insert(const Card& c) {
     cards.insert(c);
 }
 
+void BST::remove(const Card& c) {
+    auto it = cards.find(c);
+    if (it == cards.end()) 
+        throw runtime_error("Card not found");
+    cards.erase(it);
+}
+
 void BST::remove(int rank) {
     for (auto it = cards.begin(); it != cards.end(); ++it) {
         if (it->rank == rank) {

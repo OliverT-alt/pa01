@@ -28,6 +28,7 @@ public:
     BST();
     void insert(const Card& c);
     void remove(int rank);
+    void remove(const Card& c); 
     bool contains(int rank) const;
     bool contains(const Card& c) const;
     void printDeck() const;
