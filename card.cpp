@@ -122,10 +122,40 @@ void playGame(BST& alice, BST& bob) {
         cout << "Alice picked matching card " << sc << " " << rs << "\n";
 
         //Bob picks smallest matching card
-        auto bIt = bob.rbegin();
-        while (bIt != bob.rend() && !alice.contains(*aIt))
-            --bIt;
-        if (bIt == bob.rend()) break;
+            // --- Bob’s turn: largest→smallest ---
+    auto bIt = bob.rbegin();
+    while (bIt != bob.rend()) {
+        Card c = *bIt;
+        // debug:
+        std::cerr << "DEBUG: Bob considering " 
+                  << (char)(c.suit==CLUBS?'c'
+                        :c.suit==DIAMONDS?'d'
+                        :c.suit==HEARTS?'h':'s')
+                  << " " 
+                  << (c.rank==14?"a"
+                    :c.rank==13?"k"
+                    :c.rank==12?"q"
+                    :c.rank==11?"j"
+                    :std::to_string(c.rank))
+                  << " → alice.contains? " 
+                  << (alice.contains(c) ? "yes" : "no")
+                  << "\n";
+        if (alice.contains(c)) {
+            // Found it
+            std::cout << "Bob picked matching card " 
+                      << /* same formatting of c */ 
+                      << "\n";
+            alice.remove(c);
+            bob.remove(c);
+            break;
+        }
+        --bIt;
+    }
+    if (bIt == bob.rend()) {
+        std::cerr << "DEBUG: Bob found no match, ending game.\n";
+        break;
+    }
+
 
         Card matchB = *bIt;
         alice.remove(matchB);
