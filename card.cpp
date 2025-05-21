@@ -54,6 +54,11 @@ void BST::remove(int rank) {
     throw std::runtime_error("Rank not found");
 }
 
+bool BST::contains(const Card& c) const {
+    // uses Card::operator< to locate exact suit+rank
+    return cards.find(c) != cards.end();
+}
+
 bool BST::contains(int rank) const {
     for (const auto& card : cards) {
         if (card.rank == rank) return true;
@@ -89,7 +94,7 @@ void playGame(BST& alice, BST& bob) {
     // Alice smallest matching card
     while (true) {
         auto aIt = alice.begin();
-        while (aIt != alice.end() && !bob.contains(aIt->rank))
+        while (aIt != alice.end() && !bob.contains(*aIt))
             ++aIt;
         if (aIt == alice.end()) break;
 
@@ -110,7 +115,7 @@ void playGame(BST& alice, BST& bob) {
 
         //Bob picks smallest matching card
         auto bIt = bob.rbegin();
-        while (bIt != bob.rend() && !alice.contains(bIt->rank))
+        while (bIt != bob.rend() && !alice.contains(*aIt))
             --bIt;
         if (bIt == bob.rend()) break;
 
@@ -146,7 +151,7 @@ void playGame(BST& alice, BST& bob) {
                   : to_string(it->rank));
         cout << sc << " " << rs << "\n";
     }
-
+    cout << "\n";
     cout << "Bob's cards:\n";
     for (auto it = bob.begin(); it != bob.end(); ++it) {
         char sc = (it->suit==CLUBS? 'c'

@@ -29,6 +29,7 @@ public:
     void insert(const Card& c);
     void remove(int rank);
     bool contains(int rank) const;
+    bool contains(const Card& c) const;
     void printDeck() const;
     Card getSuccessorNode(const Card& c) const;
     Card getPredecessorNode(const Card& c) const;

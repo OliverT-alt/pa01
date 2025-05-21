@@ -66,7 +66,9 @@ int main(int argc, char* argv[]) {
     }
 
     bob.insert(Card(rank, suit));
-}
+    }
+    
     set_bst::playGame(alice, bob);
     return 0;
 }
+
