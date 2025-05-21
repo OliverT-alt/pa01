@@ -106,8 +106,9 @@ void playGame(BST& alice, BST& bob) {
         if (aIt == alice.end()) break;
 
         Card matchA = *aIt;
-        alice.remove(matchA.rank);
-        bob.remove(matchA.rank);
+        alice.remove(matchA);
+        bob.remove(matchA);
+
 
         char sc = (matchA.suit==CLUBS? 'c'
                  : matchA.suit==DIAMONDS? 'd'
@@ -127,8 +128,9 @@ void playGame(BST& alice, BST& bob) {
         if (bIt == bob.rend()) break;
 
         Card matchB = *bIt;
-        alice.remove(matchB.rank);
-        bob.remove(matchB.rank);
+        alice.remove(matchA);
+        bob.remove(matchA);
+
 
         sc = (matchB.suit==CLUBS? 'c'
            : matchB.suit==DIAMONDS? 'd'
