@@ -128,8 +128,8 @@ void playGame(BST& alice, BST& bob) {
         if (bIt == bob.rend()) break;
 
         Card matchB = *bIt;
-        alice.remove(matchA);
-        bob.remove(matchA);
+        alice.remove(matchB);
+        bob.remove(matchB);
 
 
         sc = (matchB.suit==CLUBS? 'c'
