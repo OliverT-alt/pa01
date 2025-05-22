@@ -3,6 +3,7 @@
 #include <fstream>
 #include <string>
 #include "card_list.h" 
+#include "card.h"
 
 using namespace std;     
 
@@ -66,13 +67,11 @@ int main(int argc, char* argv[]) {
             cerr << "Invalid suit: " << suitCh << "\n";
             continue;
         }
-        bob.insert(Card(rank, suit));
+    
+    bob.insert(Card(rank, suit));
     }
-
-    cout << "DEBUG Alice has: "; alice.printDeck();
-    cout << "DEBUG Bob   has: "; bob.printDeck();
-
-
+    
+    
     custom_bst::playGame(alice, bob);
     return 0;
 }

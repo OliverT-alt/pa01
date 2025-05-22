@@ -22,6 +22,7 @@ private:
     Node* insert(Node* node, const Card& c, Node* parent);
     Node* findMin(Node* node) const;
     Node* findNode(Node* node, int rank) const;
+    Node* findExact(Node* node, const Card& c) const;
     void clear(Node* node);
     void printInOrder(Node* node) const;
 
@@ -31,6 +32,7 @@ public:
     void insert(const Card& c);
     void remove(int rank); // Remove smallest card with given rank
     bool contains(int rank) const;
+    bool contains(const Card& c) const;
     void printDeck() const;
     Card getSuccessorNode(const Card& c) const;
     Card getPredecessorNode(const Card& c) const;

@@ -6,6 +6,7 @@
 using namespace std;
 
 namespace custom_bst {
+
     BST::BST() : root(nullptr) {}
 
     BST::~BST() {
@@ -54,12 +55,18 @@ namespace custom_bst {
         if (rank < node->card.rank) return findNode(node->left, rank);
         return findNode(node->right, rank);
     }
-void BST::remove(int rank) {
-    // 1) locate the exact node to kill
+    BST::Node* BST::findExact(Node* node, const Card& c) const {
+    if (!node) return nullptr;
+    if (c < node->card)           return findExact(node->left,  c);
+    if (node->card < c)           return findExact(node->right, c);
+    return node;  
+}
+    void BST::remove(int rank) {
+  
     Node* node = findNode(root, rank);
     if (!node) throw std::runtime_error("Rank not found");
 
-    // 2) if it has two children, swap with its in‐order successor
+    
     if (node->left && node->right) {
         Node* succ = findMin(node->right);
         node->card = succ->card;
@@ -67,11 +74,11 @@ void BST::remove(int rank) {
         node = succ;
     }
 
-    // 3) node has at most one child
+   
     Node* child = node->left ? node->left : node->right;
     if (child) child->parent = node->parent;
 
-    // 4) splice it out of the tree
+    
     if (!node->parent) {
         root = child;
     } else if (node->parent->left == node) {
@@ -81,6 +88,9 @@ void BST::remove(int rank) {
     }
 
     delete node;
+}
+    bool BST::contains(const Card& c) const {
+    return findExact(root, c) != nullptr;
 }
 
 
@@ -198,7 +208,7 @@ void playGame(BST& alice, BST& bob) {
         // Alice smallest matching card
         while (true) {
         auto aIt = alice.begin();
-        while (aIt != alice.end() && !bob.contains(aIt->rank))
+        while (aIt != alice.end() && !bob.contains(*aIt))
             ++aIt;
         if (aIt == alice.end()) break;
 
@@ -220,7 +230,7 @@ void playGame(BST& alice, BST& bob) {
 
         // Bob largest matching card
         auto bIt = bob.rbegin();
-        while (bIt != bob.rend() && !alice.contains(bIt->rank))
+        while (bIt != bob.rend() && !alice.contains(*bIt))
             --bIt;
         if (bIt == bob.rend()) break;
 
@@ -256,7 +266,7 @@ void playGame(BST& alice, BST& bob) {
                   : to_string(it->rank));
         cout << sc << " " << rs << "\n";
     }
-
+    cout << "\n";
     cout << "Bob's cards:\n";
     for (auto it = bob.begin(); it != bob.end(); ++it) {
         char sc = (it->suit==CLUBS? 'c'
