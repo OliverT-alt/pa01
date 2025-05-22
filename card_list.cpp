@@ -60,7 +60,29 @@ namespace custom_bst {
     if (c < node->card)           return findExact(node->left,  c);
     if (node->card < c)           return findExact(node->right, c);
     return node;  
-}
+    }
+
+    void BST::remove(const Card& c) {
+    Node* node = findExact(root, c);
+    if (!node) throw std::runtime_error("Card not found");
+    
+    Node* parent = node->parent;
+    Node* replacement = nullptr;
+    if (node->left && node->right) {
+        // find in-order successor
+        Node* succ = findMin(node->right);
+        Card tmp = succ->card;
+        remove(tmp);           
+        node->card = tmp;
+        return;
+    }
+    replacement = node->left ? node->left : node->right;
+    if (replacement) replacement->parent = parent;
+    if (!parent)          root = replacement;
+    else if (parent->left == node)  parent->left  = replacement;
+    else                            parent->right = replacement;
+    delete node;
+    }
     void BST::remove(int rank) {
   
     Node* node = findNode(root, rank);
@@ -213,8 +235,8 @@ void playGame(BST& alice, BST& bob) {
         if (aIt == alice.end()) break;
 
         Card matchA = *aIt;
-        alice.remove(matchA.rank);
-        bob.remove(matchA.rank);
+        alice.remove(matchA);
+        bob.remove(matchA);
 
         // formatting
         char sc = (matchA.suit==CLUBS? 'c'
@@ -235,8 +257,8 @@ void playGame(BST& alice, BST& bob) {
         if (bIt == bob.rend()) break;
 
         Card matchB = *bIt;
-        alice.remove(matchB.rank);
-        bob.remove(matchB.rank);
+        alice.remove(matchB);
+        bob.remove(matchB);
 
         sc = (matchB.suit==CLUBS? 'c'
            : matchB.suit==DIAMONDS? 'd'
