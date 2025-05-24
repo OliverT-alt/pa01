@@ -27,44 +27,38 @@ void Heap::push(int value) {
 // (but does not return it), then ensures
 // the heap is correctly arranged
 void Heap::pop() {
-  if (data.empty()) return;
-  data[0] = data.back();
-  data.pop_back();
+    if (vdata.empty()) return;
+    vdata[0] = vdata.back();
+    vdata.pop_back();
 
-  int n = int(data.size());
-  int i = 0;
-  while (true) {
-    int left  = 2*i + 1;
-    int right = 2*i + 2;
-    int smallest = i;
-
-    if (left < n && data[left] < data[smallest]) {
-      smallest = left;
+    int n = int(vdata.size());
+    int i = 0;
+    while (true) {
+        int left = 2*i + 1;
+        int right = 2*i + 2;
+        int smallest = i;
+        if (left < n && vdata[left] < vdata[smallest]) {
+            smallest = left;
+        }
+        if (right < n && vdata[right] < vdata[smallest]) {
+            smallest = right;
+        }
+        if (smallest == i) break;
+        int tmp = vdata[i];
+        vdata[i] = vdata[smallest];
+        vdata[smallest] = tmp;
+        i = smallest;
     }
-    if (right < n && data[right] < data[smallest]) {
-      smallest = right;
-    }
-    if (smallest == i) break;
-
-    // manual swap
-    int tmp = data[i];
-    data[i] = data[smallest];
-    data[smallest] = tmp;
-    i = smallest;
-  }
 }
 
 // Returns the minimum element in the heap
-int Heap::top(){
-  if (empty()){
-    cout<<"Error: heap is empty"
-    return 0;
-  }
-  return data[0];
+int Heap::top() {
+    return vdata[0];
 }
 
 // Returns true if the heap is empty, false otherwise
-bool Heap::empty(){
-  return data.empty();
+bool Heap::empty() {
+    return vdata.empty();
 }
+
     

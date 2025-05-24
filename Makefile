@@ -1,29 +1,26 @@
-# Makefile for Heap lab
-
-# Compiler and flags
 CXX      := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -O2
 
-# Executable name
-TARGET   := heap_test
+# The executable must be named 'examheap' per lab instructions
+target := examheap
 
-# Source files (add or remove .cpp files as needed)
-SRCS     := heap.cpp main.cpp
-OBJS     := $(SRCS:.cpp=.o)
+# Sources: heap implementation + test harness provided by instructor
+SRCS    := heap.cpp examheap.cpp
+OBJS    := $(SRCS:.cpp=.o)
 
-# Default target
-all: $(TARGET)
+# Default: build the executable
+all: $(target)
 
 # Link step
-$(TARGET): $(OBJS)
-<TAB>$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
+e $(target): $(OBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(OBJS)
 
 # Compile each .cpp into .o
 %.o: %.cpp heap.h
-<TAB>$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Remove build artifacts
+# Clean up build artifacts
 clean:
-<TAB>rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS) $(target)
 
 .PHONY: all clean
