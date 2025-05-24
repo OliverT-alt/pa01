@@ -8,20 +8,21 @@ using std::cout;
 // Pushes a value into the heap, then ensures
 // the heap is correctly arranged
 void Heap::push(int value) {
-  data.push_back(value);
-  int i = int(data.size()) - 1;
-  while (i > 0) {
-    int parent = (i - 1) / 2;
-    if (data[i] < data[parent]) {
-      int tmp = data[i];
-      data[i] = data[parent];
-      data[parent] = tmp;
-      i = parent;
-    } else {
-      break;
+    vdata.push_back(value);
+    int i = int(vdata.size()) - 1;
+    while (i > 0) {
+        int parent = (i - 1) / 2;
+        if (vdata[i] < vdata[parent]) {
+            int tmp = vdata[i];
+            vdata[i] = vdata[parent];
+            vdata[parent] = tmp;
+            i = parent;
+        } else {
+            break;
+        }
     }
-  }
 }
+
 
 // Pops the minimum value off the heap
 // (but does not return it), then ensures
