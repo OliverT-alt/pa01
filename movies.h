@@ -3,30 +3,38 @@
 
 #include <string>
 #include <vector>
-using namespace std;
+using namespace std;    
 
 struct Movie {
     string title;
     double rating;
 };
 
-class MovieIndex {
+struct TrieNode {
+    bool isEnd;
+    vector<int> movieIds;            // indices into your movies[]
+    TrieNode* children[26] = {nullptr};
+    TrieNode() : isEnd(false) {}     // no more bestMovieId here
+};
+
+class MovieTrie {
 public:
-    // Build indexes from the raw movies list
-    MovieIndex(const vector<Movie>& movies);
+    MovieTrie();
+    ~MovieTrie();
 
-    // Return the indices sorted alphabetically by title
-    vector<int>  getAlphaOrder() const;
+    // Build the trie from the full movie list
+    void build(const vector<Movie>& movies);
 
-    // Return the indices of all movies whose title starts with 'prefix'
-    vector<int>  search(const string& prefix) const;
+    // Insert a lowercase title at index i
+    void insert(const string& lowerTitle, int movieIndex);
+
+    // Search by ANY-length lowercase prefix, returning all matching indices
+    vector<int> search(const string& lowerPrefix) const;
 
 private:
-    const vector<Movie>* moviesPtr;
-    vector<string>       lowerTitles;  // all titles lowercased
-    vector<int>          alphaIdx;     // 0…n-1 sorted by lowerTitles[i]
-    vector<int>          ratingIdx;    // 0…n-1 sorted by movies[i].rating desc, then lowerTitles[i]
+    TrieNode* root;
+    void collectAll(TrieNode* node, vector<int>& out) const;
+    void clear(TrieNode* node);
 };
 
 #endif 
-

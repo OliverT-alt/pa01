@@ -44,16 +44,14 @@ int main(int argc, char** argv){
 
     movieFile.close();
 
-    MovieIndex index(movies);
+    MovieTrie trie;
+    trie.build(movies);
 
-    // 3) Part 1: no prefix file → print all alphabetically
     if (argc == 2) {
-        for (int idx : index.getAlphaOrder()) {
-            const auto &m = movies[idx];
-            cout << m.title << ", "
-                 << fixed << setprecision(1)
-                 << m.rating << "\n";
-        }
+        sort(movies.begin(), movies.end(),
+             [](auto &a, auto &b){ return a.title < b.title; });
+        for (auto &m : movies)
+            cout << m.title << ", " << fixed << setprecision(1) << m.rating << "\n";
         return 0;
     }
 
@@ -72,36 +70,75 @@ int main(int argc, char** argv){
     }
     vector<string> bestLines;
 
-    for (auto &prefix : prefixes) {
-        auto ids = index.search(prefix);
+       for (auto &prefix : prefixes) {
+        // Lowercase the prefix for case-insensitive lookup
+        string lower = prefix;
+        transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+
+        // Retrieve all matching movie indices
+        vector<int> ids = trie.search(lower);
+        // raw lowercased movie titles
+static vector<string> lowerTitles;
+if (lowerTitles.empty()) {
+  lowerTitles.resize(movies.size());
+  for (int i = 0; i < (int)movies.size(); ++i) {
+    lowerTitles[i] = movies[i].title;
+    transform(lowerTitles[i].begin(),
+              lowerTitles[i].end(),
+              lowerTitles[i].begin(),
+              ::tolower);
+  }
+}
+
+// filter out any ids whose raw title doesn’t start with 'lower'
+vector<int> filtered;
+filtered.reserve(ids.size());
+for (int id : ids) {
+  if (lowerTitles[id].rfind(lower, 0) == 0)  // starts_with in C++20
+    filtered.push_back(id);
+}
+ids.swap(filtered);
+                      
+
         if (ids.empty()) {
             cout << "No movies found with prefix " << prefix << "\n";
-            continue;  // no blank line after a no-match
+            continue;
         }
 
-        // print each in rating order
+        // Build a list of Movie objects to sort by rating
+        vector<Movie> matched;
+        matched.reserve(ids.size());
         for (int idx : ids) {
-            const auto &m = movies[idx];
+            matched.push_back(movies[idx]);
+        }
+
+        // Sort: highest rating first; ties broken by title
+        sort(matched.begin(), matched.end(),
+             [](const Movie &a, const Movie &b) {
+                 if (a.rating != b.rating)
+                     return a.rating > b.rating;
+                 return a.title < b.title;
+             });
+
+        // Print each match
+        for (auto &m : matched) {
             cout << m.title << ", "
                  << fixed << setprecision(1)
                  << m.rating << "\n";
         }
-        cout << "\n";  // blank line *only* after a match block
-
-        // store the best-movie line
         {
             ostringstream oss;
-            const auto &b = movies[ids.front()];
             oss << "Best movie with prefix " << prefix
-                << " is: " << b.title
+                << " is: " << matched.front().title
                 << " with rating " << fixed << setprecision(1)
-                << b.rating;
+                << matched.front().rating;
             bestLines.push_back(oss.str());
         }
+         cout << "\n";
     }
 
-    // 6) Print all "Best movie..." lines at the very end
-    for (auto &bl : bestLines) {
+    
+       for (auto &bl : bestLines) {
         cout << bl << "\n";
     }
 

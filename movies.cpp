@@ -1,64 +1,68 @@
 #include "movies.h"
 #include <algorithm>
 #include <cctype>
-#include <numeric>  // for iota
 
 using namespace std;
 
-MovieIndex::MovieIndex(const vector<Movie>& movies)
-  : moviesPtr(&movies)
-{
-    int n = movies.size();
-    lowerTitles.resize(n);
-    // 1) Build lowerTitles
-    for (int i = 0; i < n; ++i) {
-        lowerTitles[i] = movies[i].title;
-        transform(lowerTitles[i].begin(),
-                  lowerTitles[i].end(),
-                  lowerTitles[i].begin(),
-                  ::tolower);
+//construct trie
+MovieTrie::MovieTrie() {
+    root = new TrieNode();
+}
+
+//destructor
+MovieTrie::~MovieTrie() {
+    clear(root);
+}
+
+void MovieTrie::clear(TrieNode* node) {
+    if (!node) return;
+    for (int i = 0; i < 26; ++i)
+        clear(node->children[i]);
+    delete node;
+}
+
+//load movie list into trie
+void MovieTrie::build(const vector<Movie>& movies) {
+    for (int i = 0; i < (int)movies.size(); ++i) {
+        string lower = movies[i].title;
+        transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
+        insert(lower, i);
     }
-
-    // 2) Build alphaIdx = [0,1,...,n-1] sorted by lowerTitles[i]
-    alphaIdx.resize(n);
-    iota(alphaIdx.begin(), alphaIdx.end(), 0);
-    sort(alphaIdx.begin(), alphaIdx.end(),
-         [&](int a, int b){
-             return lowerTitles[a] < lowerTitles[b];
-         });
-
-    // 3) Build ratingIdx = [0,1,...,n-1] sorted by rating desc, then title asc
-    ratingIdx.resize(n);
-    iota(ratingIdx.begin(), ratingIdx.end(), 0);
-    sort(ratingIdx.begin(), ratingIdx.end(),
-         [&](int a, int b){
-             const Movie &A = (*moviesPtr)[a];
-             const Movie &B = (*moviesPtr)[b];
-             if (A.rating != B.rating)
-                 return A.rating > B.rating;
-             return lowerTitles[a] < lowerTitles[b];
-         });
 }
 
-vector<int> MovieIndex::getAlphaOrder() const {
-    return alphaIdx;
-}
-
-vector<int> MovieIndex::search(const string& prefix) const {
-    // lowercase the prefix for case-insensitive match
-    string lowP = prefix;
-    transform(lowP.begin(), lowP.end(), lowP.begin(), ::tolower);
-
-    vector<int> result;
-    // scan ratingIdx in order; pick those whose lowerTitles start with lowP
-    for (int idx : ratingIdx) {
-        const string &lt = lowerTitles[idx];
-        if (lt.size() >= lowP.size()
-            && lt.compare(0, lowP.size(), lowP) == 0)
-        {
-            result.push_back(idx);
-        }
+//insert each letter from the title as a node
+void MovieTrie::insert(const string& lowerTitle, int movieIndex) {
+    TrieNode* cur = root;
+    for (char ch : lowerTitle) {
+        if (ch < 'a' || ch > 'z') continue;
+        int idx = ch - 'a';
+        if (!cur->children[idx])
+            cur->children[idx] = new TrieNode();
+        cur = cur->children[idx];
     }
-    return result;
+    cur->isEnd = true;
+    cur->movieIds.push_back(movieIndex);
 }
 
+//search for titles
+vector<int> MovieTrie::search(const string& lowerPrefix) const {
+    TrieNode* cur = root;
+    for (char ch : lowerPrefix) {
+        if (ch < 'a' || ch > 'z') return {};       
+        cur = cur->children[ch - 'a'];
+        if (!cur) return {};                       
+    }
+    vector<int> results;
+    collectAll(cur, results);
+    return results;
+}
+
+//collect the complete title
+void MovieTrie::collectAll(TrieNode* node, vector<int>& out) const {
+    if (!node) return;
+    if (node->isEnd) {
+        out.insert(out.end(), node->movieIds.begin(), node->movieIds.end());
+    }
+    for (int i = 0; i < 26; ++i)
+        collectAll(node->children[i], out);
+}
