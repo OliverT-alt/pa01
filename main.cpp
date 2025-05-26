@@ -33,24 +33,26 @@ int main(int argc, char** argv){
         cerr << "Could not open file " << argv[1];
         exit(1);
     }
-  
-    // Create an object of a STL data-structure to store all the movies
 
+    // Read each file and store the name and rating
+    vector<Movie> movies;
     string line, movieName;
     double movieRating;
-    // Read each file and store the name and rating
-    while (getline (movieFile, line) && parseLine(line, movieName, movieRating)){
-            // Use std::string movieName and double movieRating
-            // to construct your Movie objects
-            // cout << movieName << " has rating " << movieRating << endl;
-            // insert elements into your data structure
+    while (getline(movieFile, line) && parseLine(line, movieName, movieRating)) {
+        movies.push_back({ movieName, movieRating });
     }
 
     movieFile.close();
 
-    if (argc == 2){
-            //print all the movies in ascending alphabetical order of movie names
-            return 0;
+    MovieTrie trie;
+    trie.build(movies);
+
+    if (argc == 2) {
+        sort(movies.begin(), movies.end(),
+             [](auto &a, auto &b){ return a.title < b.title; });
+        for (auto &m : movies)
+            cout << m.title << ", " << fixed << setprecision(1) << m.rating << "\n";
+        return 0;
     }
 
     ifstream prefixFile (argv[2]);
@@ -66,16 +68,58 @@ int main(int argc, char** argv){
             prefixes.push_back(line);
         }
     }
+    vector<string> bestLines;
 
-    //  For each prefix,
-    //  Find all movies that have that prefix and store them in an appropriate data structure
-    //  If no movie with that prefix exists print the following message
-    cout << "No movies found with prefix "<<"<replace with prefix>" << endl;
+       for (auto &prefix : prefixes) {
+        // Lowercase the prefix for case-insensitive lookup
+        string lower = prefix;
+        transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
 
-    //  For each prefix,
-    //  Print the highest rated movie with that prefix if it exists.
-    cout << "Best movie with prefix " << "<replace with prefix>" << " is: " << "replace with movie name" << " with rating " << std::fixed << std::setprecision(1) << "replace with movie rating" << endl;
+        // Retrieve all matching movie indices
+        vector<int> ids = trie.search(lower);
 
+        if (ids.empty()) {
+            cout << "No movies found with prefix " << prefix << "\n\n";
+            continue;
+        }
+
+        // Build a list of Movie objects to sort by rating
+        vector<Movie> matched;
+        matched.reserve(ids.size());
+        for (int idx : ids) {
+            matched.push_back(movies[idx]);
+        }
+
+        // Sort: highest rating first; ties broken by title
+        sort(matched.begin(), matched.end(),
+             [](const Movie &a, const Movie &b) {
+                 if (a.rating != b.rating)
+                     return a.rating > b.rating;
+                 return a.title < b.title;
+             });
+
+        // Print each match
+        for (auto &m : matched) {
+            cout << m.title << ", "
+                 << fixed << setprecision(1)
+                 << m.rating << "\n";
+        }
+        {
+            ostringstream oss;
+            oss << "Best movie with prefix " << prefix
+                << " is: " << matched.front().title
+                << " with rating " << fixed << setprecision(1)
+                << matched.front().rating;
+            bestLines.push_back(oss.str());
+        }
+         cout << "\n";
+    }
+
+    
+       for (auto &bl : bestLines) {
+        cout << bl << "\n";
+    }
+    
     return 0;
 }
 
