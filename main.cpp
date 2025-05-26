@@ -77,9 +77,31 @@ int main(int argc, char** argv){
 
         // Retrieve all matching movie indices
         vector<int> ids = trie.search(lower);
+        // raw lowercased movie titles
+static vector<string> lowerTitles;
+if (lowerTitles.empty()) {
+  lowerTitles.resize(movies.size());
+  for (int i = 0; i < (int)movies.size(); ++i) {
+    lowerTitles[i] = movies[i].title;
+    transform(lowerTitles[i].begin(),
+              lowerTitles[i].end(),
+              lowerTitles[i].begin(),
+              ::tolower);
+  }
+}
+
+// filter out any ids whose raw title doesn’t start with 'lower'
+vector<int> filtered;
+filtered.reserve(ids.size());
+for (int id : ids) {
+  if (lowerTitles[id].rfind(lower, 0) == 0)  // starts_with in C++20
+    filtered.push_back(id);
+}
+ids.swap(filtered);
+                      
 
         if (ids.empty()) {
-            cout << "No movies found with prefix " << prefix << "\n\n";
+            cout << "No movies found with prefix " << prefix << "\n";
             continue;
         }
 
@@ -119,7 +141,7 @@ int main(int argc, char** argv){
        for (auto &bl : bestLines) {
         cout << bl << "\n";
     }
-    
+
     return 0;
 }
 
