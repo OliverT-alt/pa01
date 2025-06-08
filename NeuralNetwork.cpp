@@ -15,16 +15,6 @@ void NeuralNetwork::eval() {
 // STUDENT TODO: IMPLEMENT
 void NeuralNetwork::train() {
     evaluating = false;
-
-    //zero out previous calculated values
-    for (auto *n : nodes) {
-        if (n) n->delta = 0.0;
-    }
-    for (auto &mapRow : adjacencyList) {
-        for (auto &kv : mapRow) {
-            kv.second.delta = 0.0;
-        }
-    }
 }
 
 //getset
@@ -97,10 +87,8 @@ vector<double> NeuralNetwork::predict(DataInstance instance) {
     }
 
     vector<double> output;
-    for (int i = 0; i < outputNodeIds.size(); i++) {
-        int dest = outputNodeIds.at(i);
-        NodeInfo* outputNode = nodes.at(dest);
-        output.push_back(outputNode->postActivationValue);
+    for (int id : outputNodeIds) {
+        output.push_back(nodes[id]->postActivationValue);
     }
 
     if (evaluating) {
@@ -133,6 +121,7 @@ bool NeuralNetwork::contribute(double y, double p) {
         if (n) n->delta = 0.0;
     }
     contributions.clear();
+    
 
     // Process input nodes and their neighbors (initial contribution)
     for (int inputId : inputNodeIds) {
@@ -143,6 +132,9 @@ bool NeuralNetwork::contribute(double y, double p) {
             visitContributeNeighbor(c, incomingContribution, outgoingContribution); 
         }
     }
+    
+
+  
 
     // Start DFT from output nodes
     for (int id : outputNodeIds) {
@@ -175,9 +167,6 @@ double NeuralNetwork::contribute(int nodeId, const double& y, const double& p) {
         outgoingContribution = -1 * ((y - p) / (p * (1 - p))); // Loss derivative
     }
 
-    // Visit node to initialize outgoingContribution
-    visitContributeNode(nodeId, outgoingContribution);
-
     // Iterate through neighbors (DFT order)
     for (auto &kv : adjacencyList[nodeId]) {
         Connection &c = kv.second;
@@ -185,6 +174,7 @@ double NeuralNetwork::contribute(int nodeId, const double& y, const double& p) {
         double incomingContribution = contribute(neighborId, y, p); // Recursive call
         visitContributeNeighbor(c, incomingContribution, outgoingContribution); // Update delta and outgoing
     }
+    visitContributeNode(nodeId, outgoingContribution);
 
     contributions[nodeId] = outgoingContribution;
     return outgoingContribution;
@@ -204,23 +194,20 @@ bool NeuralNetwork::update() {
     for (auto &adjRow : adjacencyList) {
         for (auto &kv : adjRow) {
             Connection &c = kv.second;
-            // weight_new = weight_old - (learningRate * delta)
-            c.weight -= learningRate * c.delta;
-            // reset for next round
-            c.delta = 0.0;
+            if (c.delta != 0.0) { // Ensure update only if delta exists
+                c.weight -= learningRate * c.delta;
+                c.delta = 0.0; // Reset after update
+            }
         }
     }
 
-    // update every node’s bias using its accumulated delta
+    // Apply bias updates
     for (NodeInfo* n : nodes) {
-        if (n) {
-            // bias_new = bias_old - (learningRate * delta)
-            n->bias -= learningRate * n->delta;
-            // reset for next round
-            n->delta = 0.0;
-        }
+        if (!n) continue;
+        n->bias  = n->bias - (learningRate * n->delta);
+        n->delta  = 0.0;
     }
-    
+
     flush();
     return true;
     
