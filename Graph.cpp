@@ -91,36 +91,48 @@ std::ostream& operator<<(std::ostream& out, const Connection& c) {
 
 // STUDENT TODO: IMPLEMENT
 void Graph::updateNode(int id, NodeInfo n) {
-    if (true /* stub condition: change this to the correct condition*/) {
+    if (id < 0 || id >= size) {
         cout << "Attempting to update node with id: " << id << " but node does not exist" << endl;
         return;
     }
 
-    return; //stub
+    delete nodes[id];
+    nodes[id] = new NodeInfo(n);
 }
 
 // STUDENT TODO: IMPLEMENT
 NodeInfo* Graph::getNode(int id) const {
-    return nullptr; //stub
+    if (id < 0 || id >= size) {
+        return nullptr;
+    }
+    return nodes[id];
 }
 
 // STUDENT TODO: IMPLEMENT
 void Graph::updateConnection(int v, int u, double w) {
-    if (true /* stub condition: change this to the correct condition*/) {
+    if (v < 0 || v >= size) {
         cerr << "Attempting to update connection between " << v << " and " << u << " with weight " << w << " but " << v << " does not exist" << endl;
         exit(1);
     }
-    if (true /* stub condition: change this to the correct condition*/) {
+    if (u < 0 || u >= size) {
         cerr << "Attempting to update connection between " << v << " and " << u << " with weight " << w << " but " << u << " does not exist" << endl;
         exit(1);
     }
     
-    return; //stub
+    adjacencyList[v][u] = Connection(v, u, w);
 }
 
 // STUDENT TODO: IMPLEMENT
 void Graph::clear() {
-    return; //stub
+    // delete all nodes
+    for (auto& ptr : nodes) {
+        delete ptr;
+        ptr = nullptr;
+    }
+    // clear all adjacency maps
+    for (auto& row : adjacencyList) {
+        row.clear();
+    }
 }
 
 
