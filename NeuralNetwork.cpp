@@ -1,5 +1,6 @@
 // includes
 #include "NeuralNetwork.hpp"
+#include <algorithm>
 using namespace std;
 
 
@@ -123,12 +124,30 @@ bool NeuralNetwork::contribute(double y, double p) {
     // If the node is already found, use its precomputed contribution from the contributions map
     // There is no need to visitContributeNode for the input layer since there is no bias to update.
      // clear any old contributions
+    for (auto &row : adjacencyList) {
+        for (auto &kv : row) {
+            kv.second.delta = 0.0;
+        }
+    }
+    for (NodeInfo* n : nodes) {
+        if (n) n->delta = 0.0;
+    }
     contributions.clear();
-    // back-propagate from each output node
+
+    // Process input nodes and their neighbors (initial contribution)
+    for (int inputId : inputNodeIds) {
+        for (auto &kv : adjacencyList[inputId]) {
+            Connection &c = kv.second;
+            int neighborId = c.dest;
+            double incomingContribution = contribute(neighborId, y, p); // Recursive call
+            visitContributeNeighbor(c, incomingContribution, outgoingContribution); 
+        }
+    }
+
+    // Start DFT from output nodes
     for (int id : outputNodeIds) {
         contribute(id, y, p);
     }
-
 
     flush();
 
@@ -145,41 +164,28 @@ double NeuralNetwork::contribute(int nodeId, const double& y, const double& p) {
     auto it = contributions.find(nodeId);
     if (it != contributions.end()) {
         return it->second;
-    }
+    } 
 
 
     // find each incoming contribution, and contribute to the nodes outgoing weights
     // If the node is already found, use its precomputed contribution from the contributions map
 
+    // Base case: Output node
     if (adjacencyList.at(nodeId).empty()) {
-        // base case, we are at the end
-        outgoingContribution = -1 * ((y - p) / (p * (1 - p)));
-        //immediate return
-        contributions[nodeId] = outgoingContribution;
-        return outgoingContribution;
-    } else {
-        // recursive case: propagate through children
-        for (auto& kv : adjacencyList[nodeId]) {
-            Connection& c = kv.second;
-            int childId = c.dest;
-
-            // get child's contribution
-            double childOut = contribute(childId, y, p);
-
-            // compute weight gradient and update outgoingContribution
-            visitContributeNeighbor(c, incomingContribution, outgoingContribution);
-
-            // accumulate weight delta
-            c.delta += incomingContribution;
-            // accumulate bias delta for current node
-            currNode->delta += outgoingContribution;
-        }
-        // after children, apply node-level logic
-        visitContributeNode(nodeId, outgoingContribution);
-
+        outgoingContribution = -1 * ((y - p) / (p * (1 - p))); // Loss derivative
     }
 
-    // Now contribute to yourself and prepare the outgoing contribution
+    // Visit node to initialize outgoingContribution
+    visitContributeNode(nodeId, outgoingContribution);
+
+    // Iterate through neighbors (DFT order)
+    for (auto &kv : adjacencyList[nodeId]) {
+        Connection &c = kv.second;
+        int neighborId = c.dest;
+        double incomingContribution = contribute(neighborId, y, p); // Recursive call
+        visitContributeNeighbor(c, incomingContribution, outgoingContribution); // Update delta and outgoing
+    }
+
     contributions[nodeId] = outgoingContribution;
     return outgoingContribution;
 }
