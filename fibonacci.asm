@@ -33,6 +33,9 @@ main:
     syscall
     move $t0, $v0
     
+    #if less than z exit
+    bltz $t0, exit
+    
     # Initialize all registers needed in the program (as appropriate)
     li $t1, 1
     li $t2, 1
