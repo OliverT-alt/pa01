@@ -92,17 +92,20 @@ Factorial:
 # Base Case & Recursion Case
     li $v0, 1
     li $t0, 1             
-    ble $s0, $t0, done
+    ble $s0, $t0, base
     move $a0, $s0
 
     # Recursion Case: n * Factorial(n - 1)
     addi $a0, $a0, -1    
-    jal Factorial           
+    jal Factorial
+    mul $v0, $v0, $s0
+    mflo $v0
+    j done
+base:
+    li $v0, 1             
     
 
 done:
-    mul $v0, $v0, $s0
-    mflo $v0
     # Final setup stuff with stack & regs...
     lw $ra, 4($sp) 
     lw $s0, 0($sp)       # pop
