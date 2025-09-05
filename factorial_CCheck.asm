@@ -81,37 +81,30 @@ syscall
 #TODO: write your code for Factorial() here
 Factorial:
 # Initial setup stuff with stack & regs...
-    addi $sp, $sp, -8    # Allocate space for 2 words on stack
+    addiu $sp, $sp, -8    # Allocate space for 2 words on stack
     sw $ra, 4($sp)       # Save return address
-    sw $a0, 0($sp)
-# Call ConventionCheck here
-jal ConventionCheck
+    sw $s0, 0($sp)
+    move $s0, $a0
+   # Call ConventionCheck here
+   jal ConventionCheck
 
 
 # Base Case & Recursion Case
+    li $v0, 1
+    li $t0, 1             
+    ble $s0, $t0, done
+    move $a0, $s0
 
-    li $t0, 1            
-    slt $t1, $a0, $t0    
-    beq $t1, $zero, recurse
-
-base:
-    # Base case: return 1
-    li $v0, 1            
-    j done
-
-recurse:
     # Recursion Case: n * Factorial(n - 1)
     addi $a0, $a0, -1    
-    jal Factorial       
-    lw $t2, 0($sp)       
-    mul $v0, $t2, $v0
+    jal Factorial           
+    
 
 done:
+    mul $v0, $v0, $s0
+    mflo $v0
     # Final setup stuff with stack & regs...
-    lw $ra, 4($sp)       # pop
-    addi $sp, $sp, 8   
-
-# Return to caller
-# Do not remove the "jr $ra" line below!!!
-# It should be the last line in your function code!
-jr $ra
+    lw $ra, 4($sp) 
+    lw $s0, 0($sp)       # pop
+    addiu $sp, $sp, 8   
+    jr $ra
