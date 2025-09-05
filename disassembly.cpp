@@ -33,10 +33,12 @@ string disassemble( string hex ) {
     // Convert register numbers to names
     string reg_rt, reg_rs;
     if (rt >= 0 && rt <= 3) reg_rt = "$a" + to_string(rt);
+    else if (rt >= 4 && rt <= 7) reg_rt = "$a" + to_string(rt - 4);
     else if (rt >= 8 && rt <= 15) reg_rt = "$t" + to_string(rt - 8);
     else if (rt >= 16 && rt <= 23) reg_rt = "$s" + to_string(rt - 16);
 
     if (rs >= 0 && rs <= 3) reg_rs = "$a" + to_string(rs);
+    else if (rs >= 4 && rs <= 7) reg_rs = "$a" + to_string(rs - 4);
     else if (rs >= 8 && rs <= 15) reg_rs = "$t" + to_string(rs - 8);
     else if (rs >= 16 && rs <= 23) reg_rs = "$s" + to_string(rs - 16);
 
